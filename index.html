@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mensagem Animada</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="titulo typing">Eu te amo, meu amor</div>
+
+    <div class="stage">
+        <button id="heartBtn" class="heart-btn" aria-label="Toque para receber uma mensagem de amor">
+            <span class="heart-shape" aria-hidden="true"></span>
+        </button>
+    </div>
+
+    <script>
+        (function () {
+            const frases = [
+                "Eu te amo ❤️",
+                "Obrigado por tudo 💕",
+                "Você é maravilhosa 🌹",
+                "Meu coração é seu 💖",
+                "Você é meu mundo 🌎",
+                "Com você, tudo faz sentido ✨",
+                "Você é meu sonho realizado 💘",
+                "Minha vida é mais bonita com você 🌸"
+            ];
+
+            const btn = document.getElementById('heartBtn');
+            const titulo = document.querySelector('.titulo');
+            let lastTrigger = 0;
+
+            function createPopup(text) {
+                const popup = document.createElement('div');
+                popup.className = 'popup';
+                popup.textContent = text;
+                popup.style.visibility = 'hidden';
+                document.body.appendChild(popup);
+
+                const margin = 10;
+                const pw = popup.offsetWidth;
+                const ph = popup.offsetHeight;
+                const titleHeight = (titulo ? titulo.offsetHeight + 8 : 48);
+
+                const maxX = Math.max(0, window.innerWidth - pw - margin);
+                const maxY = Math.max(0, window.innerHeight - ph - margin - titleHeight);
+
+                let x = Math.random() * maxX + margin;
+                let y = Math.random() * maxY + titleHeight + margin;
+
+                const btnRect = btn.getBoundingClientRect();
+                const overlapX = (x < btnRect.right && x + pw > btnRect.left);
+                const overlapY = (y < btnRect.bottom && y + ph > btnRect.top);
+                if (overlapX && overlapY) {
+                    if (y - (ph + 20) > titleHeight + margin) {
+                        y = Math.max(titleHeight + margin, btnRect.top - ph - 12);
+                    } else {
+                        x = Math.min(Math.max(margin, btnRect.right + 12), maxX);
+                    }
+                }
+
+                x = Math.min(Math.max(margin, x), window.innerWidth - pw - margin);
+                y = Math.min(Math.max(titleHeight + margin, y), window.innerHeight - ph - margin);
+
+                popup.style.left = x + 'px';
+                popup.style.top  = y + 'px';
+                popup.style.visibility = '';
+                setTimeout(()=> popup.remove(), 3000);
+            }
+
+            function triggerEvent() {
+                const now = Date.now();
+                if (now - lastTrigger < 450) return;
+                lastTrigger = now;
+                const text = frases[Math.floor(Math.random()*frases.length)];
+                createPopup(text);
+                btn.animate([{ transform: 'translate(-50%, -50%) scale(1)' }, { transform: 'translate(-50%, -50%) scale(0.96)' }, { transform: 'translate(-50%, -50%) scale(1)' }], { duration: 260, easing: 'ease-out' });
+            }
+
+            if ('onpointerdown' in window) {
+                btn.addEventListener('pointerdown', triggerEvent);
+            } else {
+                btn.addEventListener('touchstart', triggerEvent, { passive: true });
+                btn.addEventListener('mousedown', triggerEvent);
+            }
+            btn.addEventListener('click', triggerEvent);
+            btn.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+                    e.preventDefault();
+                    triggerEvent();
+                }
+            });
+
+            window.addEventListener('orientationchange', () => {
+                document.querySelectorAll('.popup').forEach(n => n.remove());
+                lastTrigger = 0;
+            });
+        })();
+    </script>
+</body>
+</html>
